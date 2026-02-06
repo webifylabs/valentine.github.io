@@ -48,7 +48,7 @@ body {
 
 .nav-link {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 12px 24px;
     background: rgba(255, 255, 255, 0.95);
     color: var(--primary-color);
     text-decoration: none;
@@ -59,6 +59,10 @@ body {
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 77, 109, 0.2);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .nav-link:hover {
@@ -1062,6 +1066,7 @@ body {
     z-index: 1000;
     overflow-y: auto;
     padding: 20px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal:not(.hidden) {
@@ -1079,6 +1084,9 @@ body {
     position: relative;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     animation: slideUp 0.3s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes slideUp {
@@ -1105,10 +1113,20 @@ body {
     color: var(--text-color);
     line-height: 1;
     transition: color 0.3s ease;
+    z-index: 10;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-close:hover {
     color: var(--primary-color);
+    background: rgba(255, 77, 109, 0.1);
 }
 
 .modal-title {
@@ -1157,15 +1175,19 @@ body {
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
+    padding: 10px;
 }
 
 .qr-code {
-    width: 200px;
-    height: 200px;
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    aspect-ratio: 1;
     border: 3px solid var(--primary-color);
     border-radius: 10px;
     padding: 10px;
     background: white;
+    object-fit: contain;
 }
 
 .upi-id-section {
@@ -1381,6 +1403,20 @@ body {
 
 /* Responsive Design */
 @media (max-width: 600px) {
+    .nav-home {
+        top: 15px;
+        left: 15px;
+    }
+
+    .nav-right {
+        right: 15px !important;
+    }
+
+    .nav-link {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+
     .title {
         font-size: 2rem;
     }
@@ -1394,6 +1430,12 @@ body {
         padding: 25px 20px;
         margin: 10px;
         border-radius: 20px;
+    }
+
+    .btn {
+        min-height: 48px;
+        font-size: 1.05rem;
+        padding: 14px 28px;
     }
 
     .wish-title {
@@ -1456,14 +1498,16 @@ body {
     }
 
     .btn-yes {
-        padding: 12px 35px;
-        font-size: 1.1rem;
+        padding: 16px 40px;
+        font-size: 1.15rem;
         width: 100%;
+        min-height: 52px;
     }
 
     .btn-no {
-        padding: 10px 25px;
-        font-size: 0.95rem;
+        padding: 12px 28px;
+        font-size: 1rem;
+        min-height: 48px;
     }
 
     .celebration-section {
@@ -1484,6 +1528,9 @@ body {
 
     .modal-content {
         padding: 20px;
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .share-buttons {
@@ -1492,12 +1539,38 @@ body {
 
     .btn-small {
         width: 100%;
+        min-height: 44px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        font-size: 16px !important;
+        min-height: 44px;
+    }
+
+    textarea {
+        min-height: 120px !important;
     }
 }
 
 @media (max-width: 400px) {
     .container {
         padding: 10px;
+    }
+
+    .nav-home {
+        top: 10px;
+        left: 10px;
+    }
+
+    .nav-right {
+        right: 10px !important;
+    }
+
+    .nav-link {
+        padding: 10px 16px;
+        font-size: 0.85rem;
     }
 
     .header {
@@ -1512,6 +1585,54 @@ body {
 
     .modal {
         padding: 10px;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+        margin: 10px auto;
+    }
+
+    .modal-close {
+        top: 10px;
+        right: 10px;
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        padding-right: 40px;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .modal-buttons .btn {
+        max-width: 100%;
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .qr-code {
+        max-width: 180px;
+    }
+
+    .payment-details {
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    .verification-note {
+        font-size: 0.85rem;
+        padding: 12px;
     }
 
     .wish-card {
@@ -1527,8 +1648,15 @@ body {
     }
 
     .btn {
-        padding: 12px 20px;
+        padding: 14px 24px;
         font-size: 1rem;
+        min-height: 48px;
+    }
+
+    .btn-yes {
+        padding: 16px 36px;
+        font-size: 1.1rem;
+        min-height: 52px;
     }
 
     .valentine-question {
