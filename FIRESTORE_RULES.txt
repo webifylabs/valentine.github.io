@@ -1,0 +1,83 @@
+Firebase Firestore Security Rules
+================================
+
+COPY AND PASTE THESE RULES INTO YOUR FIREBASE CONSOLE
+
+1. Go to Firebase Console: https://console.firebase.google.com/
+2. Select your project
+3. Click on "Firestore Database" in the left menu
+4. Click on the "Rules" tab
+5. Replace ALL the content with the rules below
+6. Click "Publish"
+
+---COPY BELOW THIS LINE---
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Wishes collection rules
+    match /wishes/{wishId} {
+      // Allow anyone to create a wish
+      allow create: if true;
+      
+      // Allow anyone to read a wish
+      allow read: if true;
+      
+      // Allow anyone to update (for admin panel and payment updates)
+      // In production, you should add authentication
+      allow update: if true;
+      `
+      // Allow deletion (for admin panel)
+      // In production, restrict to admin users only
+      allow delete: if true;
+    }
+  }
+}
+
+---STOP COPYING HERE---
+
+⚠️ IMPORTANT SECURITY NOTES:
+============================
+
+These rules are PERMISSIVE and designed for development/testing.
+
+For PRODUCTION deployment, you MUST:
+
+1. Add Firebase Authentication
+2. Restrict admin updates to authenticated users only
+3. Add rate limiting
+4. Validate data strictly
+5. Implement reCAPTCHA
+
+Production-Ready Rules (requires Firebase Auth):
+-------------------------------------------------
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /wishes/{wishId} {
+      // Allow anyone to create
+      allow create: if request.auth == null;
+      
+      // Allow anyone to read
+      allow read: if true;
+      
+      // Allow updates only for authenticated admin users
+      // Replace with your actual admin user IDs
+      allow update: if request.auth != null 
+                    && request.auth.uid in ['YOUR_ADMIN_UID_HERE'];
+      
+      // Allow deletion only for authenticated admin users
+      allow delete: if request.auth != null 
+                    && request.auth.uid in ['YOUR_ADMIN_UID_HERE'];
+    }
+  }
+}
+
+How to get your Admin UID:
+--------------------------
+1. Set up Firebase Authentication
+2. Sign in with your admin account
+3. In Firebase Console → Authentication → Users
+4. Copy the User UID
+5. Add it to the rules above

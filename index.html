@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Valentine Wishes ❤️</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.google.com/recaptcha/api.js?render=6LeZfGIsAAAAALInW9lxC1-U_sHdFYAtIAnAXasM"></script>
+</head>
+<body>
+    <!-- Floating hearts animation background -->
+    <div class="hearts-background">
+        <div class="heart"></div>
+        <div class="heart"></div>
+        <div class="heart"></div>
+        <div class="heart"></div>
+        <div class="heart"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="title pulse">💕 Valentine Wishes 💕</h1>
+            <p class="subtitle">Create a magical Valentine message for someone special</p>
+        </header>
+
+        <div class="card">
+            <form id="wishForm" class="wish-form">
+                <div class="form-group">
+                    <label for="recipientName">Who are you wishing? ❤️</label>
+                    <input 
+                        type="text" 
+                        id="recipientName" 
+                        name="recipientName" 
+                        placeholder="Enter their name" 
+                        required
+                        autocomplete="off"
+                        maxlength="15"
+                    >
+                    <small class="char-count">Max 15 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Your Valentine Message 💌</label>
+                    <textarea 
+                        id="message" 
+                        name="message" 
+                        rows="5" 
+                        placeholder="Write your heartfelt message here..."
+                        required
+                        maxlength="400"
+                    >Hey ❤️
+Just wanted to remind you how special you are to me.
+Every smile of yours makes my day brighter, and I'm really grateful to have you in my life.
+Happy Valentine's Day 💕</textarea>
+                    <small class="char-count"><span id="charCount">0</span>/400 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label>You are 💝</label>
+                    <div class="gender-options">
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="male" required checked>
+                            <span>Male 👨</span>
+                        </label>
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="female" required>
+                            <span>Female 👩</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Your Email 📧</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="your@email.com" 
+                        required
+                        autocomplete="email"
+                    >
+                    <small class="char-count">🔒 Will be only used for request tracking</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmEmail">Confirm Email 🔒</label>
+                    <input 
+                        type="email" 
+                        id="confirmEmail" 
+                        name="confirmEmail" 
+                        placeholder="Re-enter your email" 
+                        required
+                        autocomplete="off"
+                    >
+                    <small class="char-count email-match-note" id="emailMatchNote"></small>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="generateBtn">
+                    <span id="btnText">Don't hesitate… go make her smile this Valentine's 💖</span>
+                    <span id="btnLoader" class="loader hidden"></span>
+                </button>
+            </form>
+
+            <div id="errorMessage" class="error-message hidden"></div>
+            
+            <p class="help-message">💬 Need help? WhatsApp us at <a href="https://wa.me/918830337840" target="_blank" class="whatsapp-link">+91 8830337840</a></p>
+        </div>
+
+        <footer class="footer">
+            <p>Made with ❤️ for Valentine's Day</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

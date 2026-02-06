@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine Wish ❤️</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Floating hearts animation background -->
+    <div class="hearts-background">
+        <div class="heart"></div>
+        <div class="heart"></div>
+        <div class="heart"></div>
+        <div class="heart"></div>
+        <div class="heart"></div>
+    </div>
+
+    <nav class="nav-home">
+        <a href="index.html" class="nav-link">🏠 Create New Wish</a>
+    </nav>
+
+    <div class="container">
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+            <div class="loader-large"></div>
+            <p>Loading your wish...</p>
+        </div>
+
+        <!-- Error State (Link not found or expired) -->
+        <div id="errorState" class="error-state hidden">
+            <div class="error-icon">💔</div>
+            <h2 id="errorTitle">Link Not Found</h2>
+            <p id="errorDescription">This wish doesn't exist or has been removed.</p>
+            <a href="/" class="btn btn-secondary">Create Your Own Wish</a>
+        </div>
+
+        <!-- Wish Display State -->
+        <div id="wishState" class="wish-state hidden">
+            <!-- Valentine Question Section -->
+            <div id="valentineQuestion" class="valentine-question">
+                <div class="emoji-face" id="emojiFace">😊</div>
+                <h2 class="question-title">
+                    <span id="questionName"></span>, will you be my Valentine? 💖
+                </h2>
+                <div class="romantic-message" id="romanticMessage"></div>
+                <div class="question-buttons">
+                    <button id="yesBtn" class="btn btn-yes">Yes! 💕</button>
+                    <button id="noBtn" class="btn btn-no">No</button>
+                </div>
+            </div>
+
+            <!-- Celebration Section (shown after clicking Yes) -->
+            <div id="celebrationSection" class="celebration-section hidden">
+                <div class="celebration-content">
+                    <div class="celebration-icon">🎉💕🎊</div>
+                    <h2 class="celebration-title">Yay! You said Yes! 💖</h2>
+                    <p class="celebration-message">You've made someone very happy today! ❤️</p>
+                    <div class="valentine-message-box">
+                        <h3 class="message-title" id="messageTitle">Their message for you:</h3>
+                        <p class="valentine-message" id="valentineMessage"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Share Section -->
+            <div id="shareSection" class="share-section">
+                <p class="share-text">Share below link with your Valentine 💌</p>
+                <div class="link-display">
+                    <input type="text" id="wishLinkInput" class="link-input" readonly>
+                    <button id="copyLinkBtn" class="btn btn-copy">📋 Copy</button>
+                </div>
+                <div class="share-buttons">
+                    <button id="payNowBtn" class="btn btn-primary btn-small">💳 Pay Now to enable Yes button </button>
+                </div>
+                <p class="help-message">💬 Need help? WhatsApp us at <a href="https://wa.me/918830337840" target="_blank" class="whatsapp-link">+91 8830337840</a></p>
+            </div>
+        </div>
+
+        <!-- Payment Reminder Modal -->
+        <div id="paymentModal" class="modal hidden">
+            <div class="modal-content">
+                <span id="closePaymentModal" class="modal-close">&times;</span>
+                
+                <h2 class="modal-title">💳 Payment Required - ₹100</h2>
+                
+                <div class="payment-info">
+                    <p class="payment-text">💰 Pay ₹100 to enable the "Yes" button and unlock this Valentine wish forever!</p>
+                    <p class="whatsapp-instruction">📱 Send payment screenshot to WhatsApp: <strong>+918830337840</strong></p>
+                </div>
+                
+                <div id="paymentDetails" class="payment-details hidden">
+                    <h3 class="payment-section-title">💳 Scan to Pay ₹100</h3>
+                    <div class="qr-container">
+                        <img id="qrCode" src="" alt="UPI QR Code" class="qr-code">
+                    </div>
+                    <p class="payment-note payment-highlight">📞 After payment, WhatsApp the transaction ID and your email to <strong>+918830337840</strong>. We'll verify and enable the "Yes" button within 30 minutes.</p>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button id="closeModalBtn" class="btn btn-secondary">Thank You 💖</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module">
+        import { db } from './firebase.js';
+        import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Get wish ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const wishId = urlParams.get('id');
+
+        // DOM Elements
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const wishState = document.getElementById('wishState');
+        const shareSection = document.getElementById('shareSection');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        const payNowBtn = document.getElementById('payNowBtn');
+        const paymentModal = document.getElementById('paymentModal');
+        const closePaymentModal = document.getElementById('closePaymentModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const paymentDetails = document.getElementById('paymentDetails');
+        const qrCode = document.getElementById('qrCode');
+        const valentineQuestion = document.getElementById('valentineQuestion');
+        const questionName = document.getElementById('questionName');
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const romanticMessage = document.getElementById('romanticMessage');
+        const celebrationSection = document.getElementById('celebrationSection');
+        const emojiFace = document.getElementById('emojiFace');
+        const valentineMessage = document.getElementById('valentineMessage');
+        const messageTitle = document.getElementById('messageTitle');
+
+        let currentWish;
+        let noClickCount = 0;
+
+        const emojiFaces = [
+            '😊',  // Initial happy
+            '😕',  // First no - confused
+            '😢',  // Second no - sad
+            '😭',  // Third no - crying
+            '💔',  // Fourth no - broken heart
+            '😿',  // Fifth no - crying cat
+            '🥺',  // Sixth no - pleading
+            '😔',  // Seventh no - pensive
+            '😞',  // More nos - disappointed
+            '🤧'   // Final - very sad
+        ];
+
+        const romanticMessagesForHer = [
+            "Oh no! Please reconsider... my heart can't take a no! 💔",
+            "Are you sure? I promise to make every day special! 🌹",
+            "Wait! Give me another chance! You're the one I've been dreaming of! 💭",
+            "You're the most beautiful girl I've ever seen! Please say yes! 😊",
+            "I'll bring you flowers every day! Just click yes! 🌺",
+            "My heart skips a beat when I think of you! Please say yes! 💓",
+            "I've written poems about you! Don't break my heart! 📝",
+            "You're the sunshine in my day! Please accept! ☀️",
+            "I'll serenade you with love songs! Just say yes! 🎵",
+            "You're my favorite notification! Please don't say no! 📱",
+            "I promise infinite cuddles and kisses! Say yes! 🥰",
+            "You make my heart do backflips! Please accept! 🤸",
+            "Without you, I'm just a Wi-Fi without internet! 📡",
+            "You're the reason I smile at my phone! Please say yes! 😍",
+            "I'll share my fries with you... that's true love! 🍟",
+            "You're more beautiful than all the stars! Please! ⭐",
+            "My cat/dog approves of you! That's rare! Say yes! 🐱",
+            "Life without you is like a broken pencil... pointless! ✏️",
+            "You're the peanut butter to my jelly! Please! 🥜",
+            "I'll let you have the last slice of pizza! True love! 🍕"
+        ];
+
+        const romanticMessagesForHim = [
+            "Oh no! Please reconsider... my heart can't take a no! 💔",
+            "Are you sure? I promise to make every day special! 🌹",
+            "Wait! Give me another chance! You're the one I've been dreaming of! 💭",
+            "You're the most amazing guy I've ever met! Please say yes! 😊",
+            "I'll support you in everything! Just click yes! 🌺",
+            "My heart skips a beat when I think of you! Please say yes! 💓",
+            "I've been thinking about you all day! Don't break my heart! 📝",
+            "You're my rock and sunshine! Please accept! ☀️",
+            "You make me laugh like no one else! Just say yes! 🎵",
+            "You're my favorite person! Please don't say no! 📱",
+            "I promise to stand by your side always! Say yes! 🥰",
+            "You make my heart do backflips! Please accept! 🤸",
+            "Without you, I'm just a Wi-Fi without internet! 📡",
+            "You're the reason I smile at my phone! Please say yes! 😍",
+            "I'll share my fries with you... that's true love! 🍟",
+            "You're more handsome than all the stars! Please! ⭐",
+            "My cat/dog approves of you! That's rare! Say yes! 🐱",
+            "Life without you is like a broken pencil... pointless! ✏️",
+            "You're the peanut butter to my jelly! Please! 🥜",
+            "I'll let you have the last slice of pizza! True love! 🍕"
+        ];
+
+        // Load and display wish
+        async function loadWish() {
+            if (!wishId) {
+                showError('Link Not Found', 'This wish doesn\'t exist or has been removed.');
+                return;
+            }
+
+            try {
+                const wishRef = doc(db, 'wishes', wishId);
+                const wishSnap = await getDoc(wishRef);
+
+                if (!wishSnap.exists()) {
+                    showError('Link Not Found', 'This wish doesn\'t exist or has been removed.');
+                    return;
+                }
+
+                currentWish = wishSnap.data();
+                displayWish(currentWish);
+            } catch (error) {
+                console.error('Error loading wish:', error);
+                showError('Error Loading Wish', 'Something went wrong. Please try again later.');
+            }
+        }
+
+        function displayWish(wish) {
+            loadingState.classList.add('hidden');
+            wishState.classList.remove('hidden');
+
+            questionName.textContent = wish.recipientName;
+            valentineMessage.textContent = wish.message;
+            
+            // Set gender-based message title
+            const pronoun = wish.gender === 'male' ? 'His' : wish.gender === 'female' ? 'Her' : 'Their';
+            messageTitle.textContent = `${pronoun} message for you:`;
+            
+            // Set the link in the input field
+            const wishLinkInput = document.getElementById('wishLinkInput');
+            if (wishLinkInput) {
+                wishLinkInput.value = window.location.href;
+            }
+            
+            // Hide share section if payment is made
+            if (wish.paid) {
+                shareSection.classList.add('hidden');
+            }
+        }
+
+        function showError(title, description) {
+            loadingState.classList.add('hidden');
+            wishState.classList.add('hidden');
+            errorState.classList.remove('hidden');
+            document.getElementById('errorTitle').textContent = title;
+            document.getElementById('errorDescription').textContent = description;
+        }
+
+        // Payment Modal controls
+        closePaymentModal.addEventListener('click', () => {
+            paymentModal.classList.add('hidden');
+            paymentDetails.classList.add('hidden');
+            payNowBtn.classList.remove('hidden');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            paymentModal.classList.add('hidden');
+            paymentDetails.classList.add('hidden');
+            payNowBtn.classList.remove('hidden');
+        });
+
+        payNowBtn.addEventListener('click', () => {
+            // Show payment details
+            paymentDetails.classList.remove('hidden');
+            payNowBtn.classList.add('hidden');
+            
+            // Set QR code
+            qrCode.src = 'qr-code.png';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === paymentModal) {
+                paymentModal.classList.add('hidden');
+                paymentDetails.classList.add('hidden');
+                payNowBtn.classList.remove('hidden');
+            }
+        });
+
+        // Pay Now button - show payment modal directly
+        payNowBtn.addEventListener('click', () => {
+            paymentModal.classList.remove('hidden');
+        });
+
+        // Copy link functionality
+        copyLinkBtn.addEventListener('click', async () => {
+            // Copy the link
+            const wishLinkInput = document.getElementById('wishLinkInput');
+            const link = wishLinkInput ? wishLinkInput.value : window.location.href;
+            try {
+                await navigator.clipboard.writeText(link);
+                copyLinkBtn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    copyLinkBtn.textContent = '📋 Copy';
+                }, 2000);
+            } catch (error) {
+                console.error('Failed to copy:', error);
+            }
+        });
+
+        // Initialize
+        loadWish();
+
+        // Valentine Question Handlers
+        yesBtn.addEventListener('click', () => {
+            // Check if payment is made
+            if (currentWish && !currentWish.paid) {
+                // Show payment modal first if not paid
+                paymentModal.classList.remove('hidden');
+                
+                // Show payment details (same as Pay Now button)
+                paymentDetails.classList.remove('hidden');
+                payNowBtn.classList.add('hidden');
+                
+                // Set QR code
+                qrCode.src = 'qr-code.png';
+            } else {
+                // If already paid, show celebration directly
+                valentineQuestion.classList.add('hidden');
+                celebrationSection.classList.remove('hidden');
+                
+                // Add confetti effect
+                createConfetti();
+            }
+        });
+
+        // Move No button on click
+        noBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            moveNoButton();
+        });
+
+        function moveNoButton() {
+            const container = valentineQuestion;
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            
+            // Fade out the button
+            noBtn.style.opacity = '0';
+            noBtn.style.transition = 'opacity 0.15s ease-out';
+            
+            // Wait for fade out, then change position and fade in
+            setTimeout(() => {
+                // Get container dimensions (use offsetWidth/offsetHeight for actual rendered size)
+                const containerWidth = container.offsetWidth;
+                const containerHeight = container.offsetHeight;
+                
+                // Calculate safe bounds with padding (keep button fully inside)
+                const padding = 20;
+                const maxX = containerWidth - btnWidth - padding;
+                const maxY = containerHeight - btnHeight - padding;
+                
+                // Get current position
+                const currentX = noBtn.offsetLeft || 0;
+                const currentY = noBtn.offsetTop || 0;
+                
+                // Ensure minimum distance from current position (make it jump visibly)
+                const minDistance = 150;
+                let randomX, randomY, distance;
+                let attempts = 0;
+                const maxAttempts = 50;
+                
+                // Keep trying until we find a position far enough away
+                do {
+                    randomX = Math.random() * (maxX - padding) + padding;
+                    randomY = Math.random() * (maxY - padding) + padding;
+                    distance = Math.sqrt(Math.pow(randomX - currentX, 2) + Math.pow(randomY - currentY, 2));
+                    attempts++;
+                } while (distance < minDistance && attempts < maxAttempts);
+                
+                // Clamp values to ensure they stay within bounds
+                randomX = Math.max(padding, Math.min(randomX, maxX));
+                randomY = Math.max(padding, Math.min(randomY, maxY));
+                
+                // Apply position instantly (no transition for position)
+                noBtn.style.position = 'absolute';
+                noBtn.style.left = randomX + 'px';
+                noBtn.style.top = randomY + 'px';
+                
+                // Add random rotation for playful effect
+                const randomRotation = (Math.random() - 0.5) * 30; // -15 to +15 degrees
+                noBtn.style.transform = `rotate(${randomRotation}deg)`;
+                
+                // Fade back in
+                setTimeout(() => {
+                    noBtn.style.opacity = '1';
+                }, 50);
+                
+                // Show romantic message based on gender (sender's gender determines recipient's messages)
+                const romanticMessages = currentWish && currentWish.gender === 'male' 
+                    ? romanticMessagesForHer 
+                    : romanticMessagesForHim;
+                const message = romanticMessages[noClickCount % romanticMessages.length];
+                romanticMessage.textContent = message;
+                romanticMessage.classList.add('show');
+                
+                noClickCount++;
+                
+                // Update emoji face (gets sadder with each click)
+                const emojiIndex = Math.min(noClickCount, emojiFaces.length - 1);
+                emojiFace.textContent = emojiFaces[emojiIndex];
+                
+                // Make Yes button bigger and more prominent
+                const newScale = Math.min(1 + noClickCount * 0.08, 1.6);
+                yesBtn.style.transform = `scale(${newScale})`;
+                yesBtn.style.transition = 'transform 0.3s ease';
+            }, 150);
+        }
+
+        function createConfetti() {
+            const romanticElements = ['🌹', '🌷', '🌺', '🌸', '💖', '💕', '❤️', '💗', '🎀', '✨'];
+            const container = document.body;
+            
+            // Create continuous falling animation
+            const createFallingElement = () => {
+                const element = document.createElement('div');
+                element.className = 'falling-romantic';
+                element.textContent = romanticElements[Math.floor(Math.random() * romanticElements.length)];
+                element.style.left = Math.random() * 100 + '%';
+                element.style.animationDuration = (Math.random() * 3 + 4) + 's'; // 4-7 seconds
+                element.style.fontSize = (Math.random() * 1.5 + 1) + 'rem'; // 1-2.5rem
+                element.style.opacity = Math.random() * 0.5 + 0.5; // 0.5-1
+                container.appendChild(element);
+                
+                // Remove after animation completes
+                setTimeout(() => element.remove(), 7000);
+            };
+            
+            // Initial burst
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => createFallingElement(), i * 100);
+            }
+            
+            // Continuous falling every 300ms
+            const fallingInterval = setInterval(() => {
+                createFallingElement();
+            }, 300);
+            
+            // Store interval ID to clear later if needed
+            window.romanticFallingInterval = fallingInterval;
+        }
+    </script>
+</body>
+</html>
