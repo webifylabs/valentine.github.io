@@ -187,7 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(THROTTLE_KEY, Date.now().toString());
 
             // Redirect to wish page
-            window.location.href = `/v.html?id=${docRef.id}`;
+            const basePath = window.location.pathname.includes('/valentine.github.io/') ? '/valentine.github.io' : '';
+            window.location.href = `${basePath}/v.html?id=${docRef.id}`;
 
         } catch (error) {
             console.error('Error creating wish:', error);
