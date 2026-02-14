@@ -1,14 +1,31 @@
-@media (max-width: 700px) {
-  html, body, #app {
-    height: auto !important;
-    min-height: 100dvh;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-  .final-bg-premium {
-    min-height: 100dvh;
-    height: auto !important;
-  }
+#app {
+  width: 100vw;
+  min-height: 100vh;
+  height: auto !important;
+  position: relative;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.final-bg-premium {
+  width: 100vw;
+  min-height: 100vh;
+  height: auto !important;
+  position: absolute;
+  top: 0; left: 0;
+  z-index: 0;
+  background: linear-gradient(120deg, #2d1a4d 0%, #e63946 40%, #ffd700 100%);
+  opacity: 0.98;
+  filter: blur(0.5px);
+  pointer-events: none;
+  box-shadow: 0 0 120px 40px #ffd70044 inset;
+}
+
+html, body {
+  height: auto !important;
+  min-height: 100vh;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 /* Candle pointer/hint for lighting */
 .candle-pointer-hint {
@@ -689,4 +706,3 @@ body, html {
   .romantic-message { font-size: 0.9rem; padding: 10px 4px; }
   .final-images { gap: 8px; }
 }
-
