@@ -138,7 +138,7 @@ export function showCakeScreen(app, createStartAgainButton, showerCelebration, s
     </svg>
     <div class="cake-typography-wrap">
       <h1 class="cake-headline">Happy Birthday!</h1>
-      <div class="cake-name">..........</div>
+      <div class="cake-name">Nashuuu..</div>
       <div class="cake-text">Click on the candle to light it up!</div>
     </div>
   `;
@@ -321,3 +321,4 @@ export function showCakeScreen(app, createStartAgainButton, showerCelebration, s
     }, totalSeconds * 1000);
   });
 }
+
